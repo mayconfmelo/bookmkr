@@ -12,7 +12,17 @@ install:
 remove:
   echo "Remove feature not implemented yet"
   
-# TODO: testing command
+
 # test the program.
 test:
-  python src/bookmkr.py -v
+  #!/usr/bin/env bash
+  
+  python ../src/bookmkr.py -v
+  
+# move changes in test/ to assets/
+[private]
+deploy:
+  rm -r assets/  2>/dev/null || true
+  cp -r test/assets/ ./  2>/dev/null || true
+  cp test/bookrecipe.toml assets/  2>/dev/null || true
+  rm assets/.data.yaml

@@ -1,5 +1,5 @@
 [general]
-filetype = "epub"
+filetype = "pdf"
 output = "book"
 sources = "*.md"
 
@@ -17,17 +17,4 @@ lang = "en-US"
 date = 2024
 css = "assets/styles.css"
 cover-image = "assets/cover.png"
-
-# [[book.creator]]
-# role = "aut"
-# text = "Author"
-
-# [[book.creator]]
-# role = "pbl"
-# text = "Publisher"
-
-# [[book.creator]]
-# role = "TRL"
-# text = "Translator"
-
-
+author = "Maycon F. Melo"

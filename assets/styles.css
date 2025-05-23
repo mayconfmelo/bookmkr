@@ -6,8 +6,8 @@ html {
   hyphens: auto;
   line-height: 1.5;
   font-family: serif;
-  color: #555;
-  background-color: #FADB6F;
+  color: #000000;
+  background-color: #bfa379;
 }
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
 blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img,
@@ -29,6 +29,11 @@ ul, li, dl, dt, dd {
   widows: 2;
   orphans: 2;
 }
+.no-indent,
+p:first-child,
+:not(p) + p {
+  text-indent: 0;
+}
 .capitular,
 h1 + p::first-letter,
 h2 + p::first-letter {
@@ -38,16 +43,11 @@ h2 + p::first-letter {
   margin: 0;
   line-height: 1;
 }
-.nocapitular::first-letter {
+.no-capitular::first-letter {
   font-size: inherit;
   float: none;
   display: inherit;
   line-height: inherit;
-}
-.noindent,
-p:first-child,
-:not(p) + p {
-  text-indent: 0;
 }
 center,
 .center {
@@ -63,8 +63,8 @@ strong {
   font-weight: bold;
 }
 a, a:visited {
-  /*color: #1a1a1a;*/
   color: inherit;
+  text-decoration: underline;
 }
 img {
   max-width: 100%;
@@ -86,7 +86,7 @@ h2 {
   font-size: 1.5em;
   line-height: 135%;
 }
-h3 {
+h3, .titlepage p.subtitle {
   font-size: 1.3em;
 }
 h4 {
@@ -250,37 +250,50 @@ em em, em em em em {
 q {
   quotes: "“" "”" "‘" "’";
 }
-@media screen { /* Workaround for iBooks issue; see #6242 */
+@media screen {
+  /* Workaround for iBooks issue; see #6242 */
   .sourceCode {
     overflow: visible !important;
     white-space: pre-wrap !important;
   }
 }
+
 /* Custom CSS */
-.single p, .titlepage p {
+.page p, .titlepage p {
   text-indent: 0;
 }
-.single p::first-letter, .titlepage p::first-letter {
+.page p::first-letter, .titlepage p::first-letter {
   font-size: inherit !important;
   float: inherit !important;
   display: inherit !important;
   line-height: inherit !important;
 }
 .titlepage {
+  position: relative;
+  width: 40vh;
+  height: 65vh;
   padding: 0.5em !important;
   border: 1px solid !important;
   text-align: center !important;
   font-weight: bold !important;
+  margin: 0 auto !important;
+}
+.titlepage h1, .titlepage p {
   margin: 0 !important;
 }
-h1.title, p.subtitle, p.aut, p.date {
-  margin: 0 !important;
+.titlepage .titles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
 }
-p.subtitle {
-  font-size: 1.5em !important;
-  margin-top:5em !important;
+.titlepage .spacer {
+  height: 5em;
 }
-p.aut {
-  margin-top: 15em !important;
+.titlepage .data {
+  position: absolute;
+  bottom: 1em;
+  width: 100%;
+  margin-top: 1em;
 }
-

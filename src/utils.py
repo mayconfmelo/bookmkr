@@ -52,7 +52,7 @@ def run(cmd, output=True):
         result = subprocess.run(command, capture_output=True, text=True)
         
         if result.stderr:
-            log("e", "Pandoc error:", result.stderr)
+            log("e", "Pandoc: ", result.stderr)
             exit(1)
         if output and result.stdout != "":
             print(result.stdout)

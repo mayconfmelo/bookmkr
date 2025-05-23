@@ -125,7 +125,7 @@ while True:
     except Exception as e: utils.log("e", "\nError:", e)
     
     if args.verbose: print("OK")
-    
+        
     # Optional command executed after pandoc
     if cfg['general'].get('cmd-after'):
         utils.run(cfg['general']['cmd-after'])
@@ -138,3 +138,5 @@ while True:
             if args.verbose: utils.log("w", "Stoping continuous mode.")
             exit(0)
     else: break
+
+if args.verbose: utils.log("s", "Book created:", os.path.relpath(output))

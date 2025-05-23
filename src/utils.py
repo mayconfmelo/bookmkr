@@ -35,7 +35,7 @@ def log(type, msg, data=None):
 
 
 # Run one or more shell commands.
-def run(cmd, output=True):
+def run(cmd, get_output=False):
     import subprocess
     import shlex
   
@@ -54,8 +54,9 @@ def run(cmd, output=True):
         if result.stderr:
             log("e", "Pandoc: ", result.stderr)
             exit(1)
-        if output and result.stdout != "":
-            print(result.stdout)
+            
+        if not get_output and result.stdout != "": print(result.stdout)
+        elif get_output: return result.stdout
             
 
 # Generates left-padded paragraphs of text in terminal

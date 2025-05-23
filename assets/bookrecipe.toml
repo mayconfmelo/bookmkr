@@ -1,35 +1,22 @@
 [general]
-filetype = "pdf"
+format = "pdf"
 output = "book"
 sources = "*.md"
+cmd-before = false
+cmd-after = false
 
 [pandoc.flags]
 split-level = 2
 epub-title-page = true
+epub-cover-image = "assets/cover.png"
 pdf-engine = "typst"
 template = "./assets/templates/template"
 lua-filter = "./assets/filters.lua"
+css = "assets/styles.css"
 
 [book]
 title = "Title"
 subtitle = "Subtitle"
 lang = "en-US"
 date = 2024
-css = "assets/styles.css"
-cover-image = "assets/cover.png"
-author = "Maycon F. Melo"
-# cfg = """
-#   lang: "en"
-# """
-
-# [[book.creator]]
-# role = "aut"
-# text = "Author"
-
-# [[book.creator]]
-# role = "pbl"
-# text = "Publisher"
-
-# [[book.creator]]
-# role = "trl"
-# text = "Translator"
+author = "Author"

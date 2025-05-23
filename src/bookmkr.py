@@ -1,8 +1,11 @@
 #!/usr/bin/env python
-# DESC: Build pandoc book based on instructions in .bookrecipe files.
+# DESC: Build Pandoc books based on instructions in bookrecipe.toml files.
 # USAGE: package [OPTIONS]
-# TODOC: insert comments
+# bookmkr [OPTIONS] [FORMAT]
 
+
+# TODO: Perl filters for typ -> html
+# TODO: Implement min-book commands in md files through Perl filters
 
 import yaml
 import glob
@@ -30,7 +33,6 @@ cfg_default = proj_dir + "/assets/" + cfg_file
 cfg_local = file.find(cfg_file)
 
 if cfg_local: os.chdir(os.path.dirname(cfg_local))
-else: utils.log("f", "Not a book project!")
 
 # Init a new book
 if args.init:
@@ -65,7 +67,7 @@ if not cfg_local:
 # Book configurations
 cfg = file.toml(cfg_default, cfg_local)
 
-if args.format: cfg['general']['filetype'] = args.format
+if args.format: cfg['general']['format'] = args.format
 
 # Write .data.yaml file in assets/
 file.write(
@@ -75,7 +77,7 @@ file.write(
 
 if args.verbose:
     utils.log("m", "Book title:", f"{cfg['book']['title']}")
-    utils.log("m", "Book format:", f"{cfg['general']['filetype']}")
+    utils.log("m", "Book format:", f"{cfg['general']['format']}")
 
 
 # Collect CLI flags/arguments
@@ -83,7 +85,7 @@ flags = ""
 for key, value in cfg["pandoc"]["flags"].items():
     flags += f"--{key}={value} "
 
-if cfg['general']['filetype'] == 'pdf':
+if cfg['general']['format'] == 'pdf':
     flags += ""
 
 
@@ -98,7 +100,7 @@ if not os.path.isdir(output_dir): os.mkdir(output_dir)
 # Get the relative output path (directory and file name):
 output = os.path.join(
     output_dir,
-    cfg['book']['title'] + "." + cfg['general']['filetype']
+    cfg['book']['title'] + "." + cfg['general']['format']
 )
 
 
@@ -114,21 +116,44 @@ if args.loop:
     utils.log("m", f"Continuous building mode ({args.sleep_time}s)")
 
 while True:
-    if args.verbose: utils.log("o", "Building book...", )
-    
     # Optional command executed before pandoc
     if cfg['general'].get('cmd-before'):
-        utils.run(cfg['general']['cmd-before'])
+        cmd_before = cfg['general']['cmd-before']
+        
+        if args.verbose: utils.log("w",
+          "Running pre-generation command:", cmd_before
+        )
+        
+        try:
+            out = utils.run(cmd_before, get_output=True)
+            utils.pad(out)
+            print()
+        except Exception as e: utils.log("e", "Pre-generation:", e)
+    
+    
+    if args.verbose: utils.log("o", "Building book...", )
     
     # Execute the pandoc command
     try: utils.run(command)
-    except Exception as e: utils.log("e", "\nError:", e)
+    except Exception as e: utils.log("e", "\nPandoc:", e)
     
     if args.verbose: print("OK")
-        
+    
+    
     # Optional command executed after pandoc
     if cfg['general'].get('cmd-after'):
-        utils.run(cfg['general']['cmd-after'])
+        cmd_after = cfg['general']['cmd-after']
+        
+        if args.verbose: utils.log("w",
+          "Running post-generation command:", cmd_after
+        )
+        
+        try:
+            out = utils.run(cmd_after, get_output=True)
+            utils.pad(out)
+            print()
+        except Exception as e: utils.log("e", "Post-generation:", e)
+    
     
     # Sleep (loop) or end the program
     if args.loop:
@@ -138,5 +163,6 @@ while True:
             if args.verbose: utils.log("w", "Stoping continuous mode.")
             exit(0)
     else: break
+
 
 if args.verbose: utils.log("s", "Book created:", os.path.relpath(output))

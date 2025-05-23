@@ -16,8 +16,9 @@ remove:
 # test the program.
 test:
   #!/usr/bin/env bash
-  
-  python ../src/bookmkr.py -v
+  filepath="$(realpath src/bookmkr.py)"
+  cd test/
+  python $filepath -v
   
 # move changes in test/ to assets/
 [private]

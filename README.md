@@ -17,12 +17,12 @@ Given that the command above was executed in a `project/` directory, it creates:
 project/
 ├── 01.md
 ├── assets/
-│   ├── cover.png
-│   ├── filters.lua
-│   ├── styles.css
-│   └── templates/
+│    ├── cover.png
+│    ├── filters.lua
+│    ├── styles.css
+│    └── templates/
 ├── book/
-│   └── Title.FORMAT
+│    └── Title.FORMAT
 └── bookrecipe.toml
 
 ```

@@ -14,11 +14,20 @@ remove:
   
 
 # test the program.
-test:
+test init="none":
   #!/usr/bin/env bash
   filepath="$(realpath src/bookmkr.py)"
-  cd test/
-  python $filepath -v
+  
+  if [[ "{{init}}" == "init" ]]; then
+    rm -r test/  2>/dev/null || true
+    mkdir test/  2>/dev/null || true
+    cd test/
+    python $filepath --init
+  else
+    cd test/
+  fi
+  
+  python $filepath --verbose
   
 # move changes in test/ to assets/
 [private]

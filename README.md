@@ -11,7 +11,7 @@
 bookmkr --init
 ```
 
-Given that the command above was executed in `project/` directory, it creates:
+Given that the command above was executed in a `project/` directory, it creates:
 
 ```
 project/
@@ -34,20 +34,21 @@ in _FORMAT_ inside `book/`
 
 ## Description
 
-Allows to generate books in various formats and manage complex generation
+Allows to generate books in various formats and to manage complex generation
 processes through a `bookrecipe.toml` file. This file identifies a book project,
 and must lie in its root directory; it defines all book metadata such as title,
 subtitle, publisher, or date, and all Pandoc options used — as well as specific
 _bookmkr_ options.
 
-Besides centralize and facilitate Pandoc management, _bookmkr_ also allows to
-automatixallt execute helper commands and scripts before and after the book
+Besides facilitate Pandoc management, _bookmkr_ also allows to
+automatically execute helper commands and scripts before and after the book
 generation itself — this is useful to prepare input files before generation or
 adjust the output files after the generation.
 
-> [!INFO]
+> [!NOTE]
 > _bookmkr_ uses Typst as PDF engine and its _[min-book](https://typst.app/universe/package/min-book)_
 > package as template to generate books.
+
 
 ## Options
 
@@ -68,6 +69,9 @@ adjust the output files after the generation.
   <dd>Initialize a new book project.</dd>
 </dl>
 
+Optionally, a sole _**`format`**_ argument can be passed to set the book output file
+format — it overwrites the `bookrecipe.toml` option with the same name.
+
 
 ## Configuration File
 
@@ -76,7 +80,7 @@ By default, it assumes the following values:
 
 ```toml
 [general]
-filetype = "pdf"
+format = "pdf"
 output = "book"
 sources = "*.md"
 cmd-before = false
@@ -101,7 +105,7 @@ author = "Author"
 
 <dl>
   <dt><strong>format</strong></dt>
-  <dd>The book output file format (overwritten by CLI option).</dd>
+  <dd>The book output file format (CLI option overwrites it).</dd>
   
   <dt><strong>output</strong></dt>
   <dd>The book output file directory, relative to the project root.</dd>
@@ -110,8 +114,8 @@ author = "Author"
   <dd>A glob that colloects all input files used to generate tue book.</dd>
   
   <dt><strong>[pandoc.flags]</strong></dt>
-  <dd>Set Pandoc option flags and its values; each `pandoc --flag=value`
-  becomes a `flag = value` TOML pair. Brief `-h` flags are not supported.</dd>
+  <dd>Set Pandoc option flags and its values; each <code>pandoc --flag=value</code>
+  becomes a <code>flag = value</code> TOML pair. Brief <code>-f</code> flags are not supported.</dd>
   
   <dt><strong>[book]</strong></dt>
   <dd>Defines the book metadata such as title, author, dedication, etc.</dd>

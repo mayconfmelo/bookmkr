@@ -41,6 +41,7 @@ if args.init:
         exit(1)
     else:
         import shutil
+        import lorem
         
         # Copy assets/ to $PWD
         shutil.copytree(proj_dir + "/assets/", "./assets/")
@@ -53,6 +54,8 @@ if args.init:
         # Create a bolerplate initial content file
         with open("./01.md", "w") as file:
             file.write("# Introduction\n\n")
+            file.write(lorem.paragraph() + "\n\n")
+            file.write(lorem.paragraph())
           
         utils.log("s", "Book project initialized!")
         exit(0)

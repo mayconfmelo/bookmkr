@@ -74,7 +74,8 @@ adjust the output files after the generation.
 The `bookrecipe.toml` concentrates all options needed to manage the project.
 By default, it assumes the following values:
 
-```toml[general]
+```toml
+[general]
 filetype = "pdf"
 output = "book"
 sources = "*.md"

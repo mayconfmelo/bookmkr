@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # DESC: Build Pandoc books based on instructions in bookrecipe.toml files.
-# USAGE: package [OPTIONS]
-# bookmkr [OPTIONS] [FORMAT]
+# USAGE: bookmkr [OPTIONS] <FORMAT>
 
 
 # TODO: Perl filters for typ -> html
@@ -61,7 +60,7 @@ if args.init:
         exit(0)
 
 
-# Anort if not in a book project directory
+# Abort if not in a book project directory
 if not cfg_local:
     utils.log("f", "Not a book project")
     exit(2)
@@ -85,14 +84,12 @@ if args.verbose:
 
 # Collect CLI flags/arguments
 flags = ""
+if cfg['general']['format'] == 'pdf': flags += "--pdf-engine='typst' "
 for key, value in cfg["pandoc"]["flags"].items():
-    flags += f"--{key}={value} "
-
-if cfg['general']['format'] == 'pdf':
-    flags += ""
+    flags += f'--{key}="{value}" '
 
 
-# Get the relative outpit directory
+# Get the relative output directory
 output_dir = os.path.join(
     os.path.relpath(os.path.dirname(cfg_local)),
     cfg['general']['output']

@@ -80,27 +80,41 @@ By default, it assumes the following values:
 
 ```toml
 [general]
-format = "pdf"
+format = "epub"
 output = "book"
 sources = "*.md"
 cmd-before = false
 cmd-after = false
-
-[pandoc.flags]
-split-level = 2
-epub-title-page = true
-epub-cover-image = "assets/cover.png"
-pdf-engine = "typst"
-template = "./assets/templates/template"
-lua-filter = "./assets/filters.lua"
-css = "assets/styles.css"
 
 [book]
 title = "Title"
 subtitle = "Subtitle"
 lang = "en-US"
 date = 2024
-author = "Author"
+edition = 1
+volume = 1
+author = [ "Author" ]
+publisher = [ "Publisher" ]
+date = 2025
+cover-image = "assets/cover.png"
+titlepage = auto
+catalog = "none"
+errata = "none"
+dedication = "none"
+acknowledgements = "none"
+epigraph = "none"
+toc = true
+part = "auto"
+chapter = "auto"
+cfg = [ {name = "font-size", value = '22pt'} ]
+
+[pandoc.flags]
+split-level = 2
+epub-title-page = true
+pdf-engine = "typst"
+template = "./assets/templates/template"
+lua-filter = "./assets/filters.lua"
+css = "assets/styles.css"
 ```
 
 <dl>
@@ -112,6 +126,14 @@ author = "Author"
   
   <dt><strong>sources</strong></dt>
   <dd>A glob that colloects all input files used to generate tue book.</dd>
+
+  <dt><strong>cmd-before</strong></dt>
+  <dd>A string or arrays with a single shell command to he executed before the
+  main <code>pandoc</code> parsing.</dd>
+
+  <dt><strong>cmd-after</strong></dt>
+  <dd>A string or arrays with a single shell command to he executed after the
+  main <code>pandoc</code> parsing.</dd>
   
   <dt><strong>[pandoc.flags]</strong></dt>
   <dd>Set Pandoc option flags and its values; each <code>pandoc --flag=value</code>

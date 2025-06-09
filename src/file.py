@@ -76,3 +76,17 @@ def write(content, path):
     
     if __main__.args.verbose: utils.log("m", "Created file:", f"{path}")
 
+
+# Resolves one or more globs
+def globs(globs):
+    import glob
+    
+    if not isinstance(globs, list): globs = [globs]
+
+    result = []
+    for pat in globs:
+        paths = glob.glob(pat)
+        
+        for path in sorted(paths):
+            result.append(path)
+    return result

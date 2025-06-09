@@ -2,9 +2,8 @@
 # DESC: Build Pandoc books based on instructions in bookrecipe.toml files.
 # USAGE: bookmkr [OPTIONS] <FORMAT>
 
-
-# TODO: Perl filters for typ -> html
 # TODO: Implement min-book commands in md files through Perl filters
+
 
 import yaml
 import glob
@@ -40,23 +39,38 @@ if args.init:
         exit(1)
     else:
         import shutil
-        import lorem
         
         # Copy assets/ to $PWD
-        shutil.copytree(proj_dir + "/assets/", "./assets/")
+        shutil.copytree(f"{proj_dir}/assets/", "./assets/")
         utils.log("m", "Created folder:", "assets/")
         
         # Move cfg_file from $PWD/assets/ to $PWD
-        shutil.move("./assets/" + cfg_file, "./")
+        shutil.move(f"./assets/{cfg_file}", "./")
         utils.log("m", "Created file:", cfg_file)
         
-        # Create a bolerplate initial content file
-        with open("./01.md", "w") as file:
-            file.write("# Introduction\n\n")
-            file.write(lorem.paragraph() + "\n\n")
-            file.write(lorem.paragraph())
-          
+        # Move 01.md from $PWD/assets/ to $PWD
+        shutil.move("./assets/01.md", "./")
+        with open(f"{proj_dir}/README.md", 'r', encoding='UTF-8') as readme:
+            readme = readme.read()
+            readme = readme.replace("# ", "## ")
+        with open("01.md", 'a', encoding='UTF-8') as init:
+            init.write("\n\n\n# Documentation\n\n\n")
+            init.write(readme)
+        utils.log("m", "Created file:", "01.md")
+        
+        # Move 01.md from $PWD/assets/ to $PWD
+        shutil.move("./assets/gitignore", "./.gitignore")
+        utils.log("m", "Created file:", ".gitignore")
+        
+        out = utils.run(f'git init .', get_output=True)
+        utils.run(f'git config --global --add safe.directory .')
+        utils.run(f'git add .')
+        out += utils.run(f'git commit -m "Book initialized!"', get_output=True)
+        utils.log("m", "Created Git repository:", out)
+        
         utils.log("s", "Book project initialized!")
+        print()
+        
         exit(0)
 
 
@@ -67,32 +81,36 @@ if not cfg_local:
 
 
 # Book configurations
-cfg = file.toml(cfg_default, cfg_local)
+cfg = utils.DictAttr(
+    file.toml(cfg_default, cfg_local)
+)
 
-if args.format: cfg['general']['format'] = args.format
+if args.format: cfg.general.format = args.format
 
 # Write .data.yaml file in assets/
 file.write(
   yaml.dump(cfg["book"]),
   os.path.dirname(cfg_local) + "/assets/.data.yaml"
 )
+cfg.book.title = cfg.book.title.replace("\\n", " ")
 
 if args.verbose:
-    utils.log("m", "Book title:", f"{cfg['book']['title']}")
-    utils.log("m", "Book format:", f"{cfg['general']['format']}")
+    utils.log("m", "Book title:", f"{cfg.book.title}")
+    utils.log("m", "Book format:", f"{cfg.general.format}")
 
 
 # Collect CLI flags/arguments
 flags = ""
-if cfg['general']['format'] == 'pdf': flags += "--pdf-engine='typst' "
-for key, value in cfg["pandoc"]["flags"].items():
-    flags += f'--{key}="{value}" '
+if cfg.general.format == 'pdf': flags += "--pdf-engine='typst' "
+for key, value in cfg.pandoc.flags.items():
+    if value == 'true': flags += f'--{key} '
+    else: flags += f'--{key}="{value}" '
 
 
 # Get the relative output directory
 output_dir = os.path.join(
     os.path.relpath(os.path.dirname(cfg_local)),
-    cfg['general']['output']
+    cfg.general.output
 )
 if not os.path.isdir(output_dir): os.mkdir(output_dir)
 
@@ -100,16 +118,16 @@ if not os.path.isdir(output_dir): os.mkdir(output_dir)
 # Get the relative output path (directory and file name):
 output = os.path.join(
     output_dir,
-    cfg['book']['title'] + "." + cfg['general']['format']
+    cfg.book.title + "." + cfg.general.format
 )
 
-
 # Generates the pandoc command:
-command = "pandoc "
-command += f"--output='{output}' "
-command +=  "--metadata-file='assets/.data.yaml' "
-command += f"{flags}"
-command += " ".join(sorted(glob.glob(cfg["general"]["sources"])))
+command = 'pandoc '
+command += f'--output="{output}" '
+command +=  '--metadata-file="assets/.data.yaml" '
+command += f'{flags}'
+#command += " ".join(sorted( glob.glob(cfg.general.sources) ))
+command += " ".join(file.globs(cfg.general.sources))
 
 if args.loop:
     import time
@@ -117,41 +135,45 @@ if args.loop:
 
 while True:
     # Optional command executed before pandoc
-    if cfg['general'].get('cmd-before'):
-        cmd_before = cfg['general']['cmd-before']
+    if cfg.general.get("cmd-before"):
+        cmd_before = cfg.general["cmd-before"]
         
         if args.verbose: utils.log("w",
           "Running pre-generation command:", cmd_before
         )
         
+        os.chdir(os.path.dirname(cfg_local))
+        
         try:
             out = utils.run(cmd_before, get_output=True)
-            utils.pad(out)
-            print()
+            if args.verbose: 
+                utils.pad(out, wraplines=False)
+                print()
         except Exception as e: utils.log("e", "Pre-generation:", e)
-    
     
     if args.verbose: utils.log("o", "Building book...", )
     
     # Execute the pandoc command
     try: utils.run(command)
-    except Exception as e: utils.log("e", "\nPandoc:", e)
-    
-    if args.verbose: print("OK")
+    except Exception as e: utils.log("e", "Execution failed:", e)
+    if args.verbose: print("OK\n")
     
     
     # Optional command executed after pandoc
-    if cfg['general'].get('cmd-after'):
-        cmd_after = cfg['general']['cmd-after']
+    if cfg.general.get('cmd-after'):
+        cmd_after = cfg.general['cmd-after']
         
         if args.verbose: utils.log("w",
           "Running post-generation command:", cmd_after
         )
         
+        os.chdir(os.path.dirname(cfg_local))
+        
         try:
             out = utils.run(cmd_after, get_output=True)
-            utils.pad(out)
-            print()
+            if args.verbose:
+              utils.pad(out, wraplines=False)
+              print()
         except Exception as e: utils.log("e", "Post-generation:", e)
     
     

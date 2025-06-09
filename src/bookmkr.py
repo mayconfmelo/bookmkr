@@ -15,13 +15,39 @@ import file
 
 # CLI argument parsing
 parser = argparse.ArgumentParser(description="")
-parser.add_argument("-v", "--verbose", action="store_true", help="enables veebose mode.")
-parser.add_argument("-l", "--loop", action="store_true", help="enables infinite loop.")
-parser.add_argument("-s", "--sleep-time", type=float, default=1.0, help="set time between each build in loop mode (default: 1.0)")
-parser.add_argument("-i", "--init", action="store_true", help="initialize a new book project.")
-parser.add_argument("format", nargs="?", help="set the book format.")
+parser.add_argument(
+    "-v", "--verbose", 
+    help="enables verbose mode.", action="store_true"
+)
+parser.add_argument(
+    "-l", "--loop", const=1.0,
+    help="enables infinite loop.", type=float, nargs='?'
+)
+parser.add_argument(
+    "-s", "--sleep-time",
+    help="set time between each build in loop mode (default: 1.0)",
+    type=float, default=1.0
+)
+parser.add_argument(
+    "-i", "--init",
+    help="initialize a new book project.", action="store_true",
+)
+parser.add_argument(
+    "-c", "--color", default=True,
+    help="initialize a new book project.", action=argparse.BooleanOptionalAction
+)
+parser.add_argument(
+    "format",
+    help="set the book format.", nargs="?",
+)
 # CLI arguments
 args = parser.parse_args()
+
+# Init terminal logger
+log = utils.Log(
+    verbose=args.verbose,
+    color=args.color
+)
 
 
 proj_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -34,19 +60,18 @@ if cfg_local: os.chdir(os.path.dirname(cfg_local))
 
 # Init a new book
 if args.init:
-    if cfg_local:
-        utils.log("w", "There's a book project here already!")
-        exit(1)
-    else:
+    log = utils.Log(verbose=True)
+    
+    if not cfg_local:
         import shutil
         
         # Copy assets/ to $PWD
         shutil.copytree(f"{proj_dir}/assets/", "./assets/")
-        utils.log("m", "Created folder:", "assets/")
+        log.m("Created folder:", "assets/")
         
         # Move cfg_file from $PWD/assets/ to $PWD
         shutil.move(f"./assets/{cfg_file}", "./")
-        utils.log("m", "Created file:", cfg_file)
+        log.m("Created file:", cfg_file)
         
         # Move 01.md from $PWD/assets/ to $PWD
         shutil.move("./assets/01.md", "./")
@@ -56,27 +81,29 @@ if args.init:
         with open("01.md", 'a', encoding='UTF-8') as init:
             init.write("\n\n\n# Documentation\n\n\n")
             init.write(readme)
-        utils.log("m", "Created file:", "01.md")
+        log.m("Created file:", "01.md")
         
         # Move 01.md from $PWD/assets/ to $PWD
         shutil.move("./assets/gitignore", "./.gitignore")
-        utils.log("m", "Created file:", ".gitignore")
+        log.m("Created file:", ".gitignore")
         
         out = utils.run(f'git init .', get_output=True)
         utils.run(f'git config --global --add safe.directory .')
         utils.run(f'git add .')
         out += utils.run(f'git commit -m "Book initialized!"', get_output=True)
-        utils.log("m", "Created Git repository:", out)
+        log.m("Created Git repository:", out)
         
-        utils.log("s", "Book project initialized!")
-        print()
+        log.s("Book project initialized!")
         
         exit(0)
+    else:
+        log.w("There's a book project here already!")
+        exit(1)
 
 
 # Abort if not in a book project directory
 if not cfg_local:
-    utils.log("f", "Not a book project")
+    log.f("Not a book project")
     exit(2)
 
 
@@ -94,9 +121,8 @@ file.write(
 )
 cfg.book.title = cfg.book.title.replace("\\n", " ")
 
-if args.verbose:
-    utils.log("m", "Book title:", f"{cfg.book.title}")
-    utils.log("m", "Book format:", f"{cfg.general.format}")
+log.m("Book title:", f"{cfg.book.title}")
+log.m("Book format:", f"{cfg.general.format}")
 
 
 # Collect CLI flags/arguments
@@ -131,60 +157,53 @@ command += " ".join(file.globs(cfg.general.sources))
 
 if args.loop:
     import time
-    utils.log("m", f"Continuous building mode ({args.sleep_time}s)")
+    log.m(f"Continuous building mode ({args.sleep_time}s)")
 
 while True:
     # Optional command executed before pandoc
     if cfg.general.get("cmd-before"):
         cmd_before = cfg.general["cmd-before"]
         
-        if args.verbose: utils.log("w",
-          "Running pre-generation command:", cmd_before
-        )
+        log.w("Running pre-generation command:", cmd_before)
         
         os.chdir(os.path.dirname(cfg_local))
         
-        try:
-            out = utils.run(cmd_before, get_output=True)
-            if args.verbose: 
-                utils.pad(out, wraplines=False)
-                print()
-        except Exception as e: utils.log("e", "Pre-generation:", e)
+        out = utils.run(cmd_before, get_output=True)
+        if args.verbose and out != '': 
+            utils.pad(out, wraplines=False)
+            print()
     
-    if args.verbose: utils.log("o", "Building book...", )
+    
+    log.o("Building book...", )
     
     # Execute the pandoc command
-    try: utils.run(command)
-    except Exception as e: utils.log("e", "Execution failed:", e)
-    if args.verbose: print("OK\n")
+    utils.run(command)
+    if args.verbose and not args.loop: print("OK\n")
     
     
     # Optional command executed after pandoc
     if cfg.general.get('cmd-after'):
         cmd_after = cfg.general['cmd-after']
         
-        if args.verbose: utils.log("w",
-          "Running post-generation command:", cmd_after
-        )
+        log.w("Running post-generation command:", cmd_after)
         
         os.chdir(os.path.dirname(cfg_local))
         
-        try:
-            out = utils.run(cmd_after, get_output=True)
-            if args.verbose:
-              utils.pad(out, wraplines=False)
-              print()
-        except Exception as e: utils.log("e", "Post-generation:", e)
+        out = utils.run(cmd_after, get_output=True)
+        if args.verbose and out != '':
+          utils.pad(out, wraplines=False)
+          print()
     
     
     # Sleep (loop) or end the program
     if args.loop:
-        try: time.sleep(args.sleep_time)
+        try: time.sleep(args.loop)
+        
         
         except KeyboardInterrupt:
-            if args.verbose: utils.log("w", "Stoping continuous mode.")
+            log.w("Stoping continuous mode.")
             exit(0)
     else: break
 
 
-if args.verbose: utils.log("s", "Book created:", os.path.relpath(output))
+log.s("Book created:", os.path.relpath(output))

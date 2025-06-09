@@ -124,10 +124,11 @@ blockquote {
   font-style: italic;
 }
 code {
-  font-family: monospace;
-  font-size: 85%;
+  font-family: monospace !important;
+  /* font-size: 85%; */
+  padding: 0;
   margin: 0;
-  hyphens: manual;
+  hyphens: none;
 }
 pre {
   margin: 1em 0;
@@ -258,7 +259,19 @@ q {
   }
 }
 
-/* Custom CSS */
+dl {
+  hyphens: auto;
+}
+dl, dl dt, pre code {
+  margin: 0;
+}
+pre.sourceCode, pre, dl dd {
+  margin-left: 1em;
+}
+blockquote {
+  margin: 1em;
+  hyphens: auto;
+}
 .page p, .titlepage p {
   text-indent: 0;
 }
@@ -269,31 +282,36 @@ q {
   line-height: inherit !important;
 }
 .titlepage {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 40vh;
   height: 65vh;
-  padding: 0.5em !important;
+  padding: 1em 0.5em !important;
   border: 1px solid !important;
   text-align: center !important;
   font-weight: bold !important;
   margin: 0 auto !important;
 }
-.titlepage h1, .titlepage p {
+.titlepage > * {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
   margin: 0 !important;
 }
-.titlepage .titles {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-}
-.titlepage .spacer {
-  height: 5em;
+.titlepage * {
+  margin: 0 !important;
+  padding: 0;
 }
 .titlepage .data {
-  position: absolute;
-  bottom: 1em;
-  width: 100%;
-  margin-top: 1em;
+  align-items: flex-end;
+}
+.box {
+  margin: 1em;
+  padding: 0.5em;
+  border: 1px solid !important;
+}
+.box > * {
+  margin: 0;
+  padding: 0;
 }

@@ -1,22 +1,36 @@
 [general]
-format = "pdf"
+format = "epub"
 output = "book"
 sources = "*.md"
 cmd-before = false
 cmd-after = false
 
+[book]
+title = "Title"
+# subtitle = "Subtitle"
+# lang = "en-US"
+# date = 2024
+# edition = 1
+# volume = 1
+# author = [ "Author" ]
+# publisher = [ "Publisher" ]
+# date = 2025
+# cover-image = "assets/cover.png"
+# titlepage = auto
+# catalog = "none"
+# errata = "none"
+# dedication = "none"
+# acknowledgements = "none"
+# epigraph = "none"
+# toc = true
+# part = "auto"
+# chapter = "auto"
+# cfg = [ {name = "font-size", value = '22pt'} ]
+
 [pandoc.flags]
 split-level = 2
 epub-title-page = true
-epub-cover-image = "assets/cover.png"
 pdf-engine = "typst"
 template = "./assets/templates/template"
 lua-filter = "./assets/filters.lua"
 css = "assets/styles.css"
-
-[book]
-title = "Title"
-subtitle = "Subtitle"
-lang = "en-US"
-date = 2024
-author = "Author"

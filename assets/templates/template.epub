@@ -24,7 +24,10 @@
 <body$if(coverpage)$ id="cover"$endif$$if(body-type)$ epub:type="$body-type$"$endif$>
 $if(titlepage)$
   <section epub:type="titlepage" class="titlepage">
+    <div></div>
+    
     <div class="titles">
+    <div>
       $for(title)$
         $if(title.type)$
           <h1 class="title $title.type$">$title.text$</h1>
@@ -36,10 +39,10 @@ $if(titlepage)$
         <p class="subtitle">$subtitle$</p>
       $endif$
     </div>
-    
-    <div class="spacer"></div>
+    </div>
     
     <div class="data">
+    <div>
       $for(author)$
         <p class="author">$author$</p>
       $endfor$
@@ -62,6 +65,7 @@ $if(titlepage)$
           $abstract$
         </div>
       $endif$
+    </div>
     </div>
 </section>
 $else$ $if(coverpage)$

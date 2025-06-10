@@ -18,6 +18,7 @@ function BlockQuote(el)
   return el
 end
 
+
 function Div(el)
   -- Typst
   if FORMAT == "typst" then
@@ -33,8 +34,8 @@ function Div(el)
       ]] .. content .. "\n]\n"
     
     -- ::: {.no-dropcap}
-    elseif el.classes:includes("dropcap") then
-      content = "#block[\n#let dropcap(c) = {c}\n" .. content
+    elseif el.classes:includes("no-dropcap") then
+      content = "#block[\n#let dropcap(c) = {c}\n" .. content .. "]"
     end
       
     -- ::: {.indent}

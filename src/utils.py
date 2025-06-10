@@ -1,84 +1,107 @@
-
-# Pretty print log messages
-def log(type, msg, data=None):
-    # ANSI escape codes for text colors
-    RED = '\033[31;1m'
-    GREEN = '\033[32;1m'
-    YELLOW = '\033[33;1m'
-    BLUE = '\033[34;1m'
-    MAGENTA = '\033[35;1m'
-    CYAN = '\033[36;1m'
-    WHITE = '\033[37;1m'
-    RESET = '\033[0m'
-
-    match type:
-        case "m":
-            print(f"{WHITE}[MESSAGE]{RESET} {msg}", flush=True)
-        case "s":
-            print(f"{GREEN}[SUCCESS]{RESET} {msg}", flush=True)
-        case "o":
-            print(f"{BLUE}[ONGOING]{RESET} {msg}", flush=True, end="")
-        case "w":
-            print(f"{YELLOW}[WARNING]{RESET} {msg}", flush=True)
-        case "e":
-            print(f"{RED}[ ERROR ]{RESET} {msg}", flush=True)
-        case "f":
-            print(f"{RED}[ FATAL ]{RESET} {msg}", flush=True)
-            exit(data)
-        case _:
-            print(f"{RED}[ ERROR ]{RESET} Wrong log type \"{type}\" for message \"{msg}\".")
-
-    if data is not None:
-        print(MAGENTA, end="")
-        pad(data, wraplines=False)
-        print(RESET)
+from watchdog.events import FileSystemEventHandler
+import __main__
 
 
-# Run one or more shell commands.
-def run(cmd, get_output=False):
-    import subprocess
-    import shlex
-  
-    # Convert string cmd into list:
-    if not isinstance(cmd, (list, tuple)):
-        cmd = [cmd]
-      
-    # Run each command from cmd
-    for command in cmd:
-        # Break string command into list
-        if isinstance(command, str):
-            command = shlex.split(command)
-            
-        result = subprocess.run(command, capture_output=True, text=True)
+class Log:
+    """Init a logger for pretty print log messages."""
+
+    def __init__(self, flush=True, color=True, verbose=True):
+        self.flush = flush
+        self.verbose = verbose
+        if color:
+            self.red = '\033[31;1m'
+            self.green = '\033[32;1m'
+            self.yellow= '\033[33;1m'
+            self.blue = '\033[34;1m'
+            self.magenta = '\033[35;1m'
+            self.cyan = '\033[36;1m'
+            self.white = '\033[37;1m'
+            self.reset = '\033[0m'
+        else:
+            self.red = ''
+            self.green = ''
+            self.yellow= ''
+            self.blue = ''
+            self.magenta = ''
+            self.cyan = ''
+            self.white = ''
+            self.reset = ''
+    
+    def __getattr__(self, name):
+        import inspect
+        members = inspect.getmembers(self.__class__, predicate=inspect.isfunction)
+        methods = []
         
-        if result.stderr:
-            print()
-            log("e", "Command execution failed: ", result.stderr)
-            exit(1)
-            
-        if not get_output and result.stdout != "": print(result.stdout)
-        elif get_output: return result.stdout
-            
-
-# Generates left-padded paragraphs of text in terminal
-def pad(text, n=9, wraplines=True):
-    import textwrap
-    import shutil
-
-    width = shutil.get_terminal_size().columns - (n + 1)
-
-    lines = []
-    if wraplines == False and '\n' in text.strip(): 
-      for part in text.split('\n'):
-          for line in textwrap.wrap(part, width=width): lines.append(line)
-    else: lines = textwrap.wrap(text, width=width)
+        for name, member in members:
+            if not name.startswith('__'):
+                methods.append(f"Log.{name}")
+                
+        methods = ", ".join(methods)
+        self.f(f"Does not exist: Log.{name}()", f"Must be one of: {methods}.")
     
-    for line in lines:
-        print(" " * n, line.ljust(width))
-    
+    def m(self, msg, data=None):
+        """Print a standard log message."""
+        
+        if not self.verbose: return
+        print(f"{self.white}[MESSAGE]{self.reset} {msg}", flush=self.flush)
+        if data:
+            print(self.magenta, end='')
+            pad(data, wraplines=False, end ='')
+            print(self.reset)
+        print()
 
-# Allows to access dict["foo"] as dict.foo
+    def s(self, msg, data=None):
+        """Print a success log message"""
+        
+        if not self.verbose: return
+        print(f"{self.green}[SUCCESS]{self.reset} {msg}", flush=self.flush)
+        if data:
+            print(self.magenta, end='')
+            pad(data, wraplines=False, end ='')
+            print(self.reset)
+        print()
+        
+    def o(self, msg):
+        """Print ongoing process log message"""
+        
+        if not self.verbose: return
+        print(f"{self.blue}[ONGOING]{self.reset} {msg}", flush=True, end="")
+        
+    def w(self, msg, data=None):
+        """Print warning log message"""
+        
+        if not self.verbose: return
+        print(f"{self.yellow}[WARNING]{self.reset} {msg}", flush=self.flush)
+        if data:
+            print(self.magenta, end='')
+            pad(data, wraplines=False, end ='')
+            print(self.reset)
+        print()
+        
+    def e(self, msg, data=None):
+        """Print error log message"""
+        
+        print(f"{self.red}[ ERROR ]{self.reset} {msg}", flush=self.flush)
+        if data:
+            print(self.magenta, end='')
+            pad(data, wraplines=False, end ='')
+            print(self.reset)
+        print()
+        
+    def f(self, msg, data=None, code=1):
+        """Print fatal log message and anort execution."""
+        
+        print(f"{self.red}[ FATAL ] {msg}{self.reset}", flush=self.flush)
+        if data:
+            print(self.magenta, end='')
+            pad(data, wraplines=False, end ='')
+            print(self.reset)
+        exit(code)
+
+
 class DictAttr(dict):
+    """Init a dictionary object that allows to access dict["foo"] as dict.foo"""
+    
     def __getattr__(self, attr):
         value = self.get(attr)
         if isinstance(value, dict) and not isinstance(value, DictAttr):
@@ -105,3 +128,79 @@ class DictAttr(dict):
             del self[attr]
         except KeyError:
             raise AttributeError(f"No such attribute: {attr}")
+
+
+    """Handles modificafions made in one or more paths."""
+class WatchHandler(FileSystemEventHandler):
+  
+    def __init__(self, callback, files):
+        self.callback = callback
+        self.files = files
+        self.mtimes = {}
+
+    def on_modified(self, event):
+        event.src_path = event.src_path.replace(__main__.cfg_local_dir + "/", "")
+        
+        if not event.is_directory and event.src_path in self.files:
+            import os
+            
+            curr_mtime = os.path.getmtime(event.src_path)
+            prev_mtime = self.mtimes.get(event.src_path)
+            
+            if prev_mtime is None or curr_mtime - prev_mtime > 0.5:
+                from datetime import datetime
+                
+                now = datetime.fromtimestamp(curr_mtime).strftime("%H:%M:%S")
+                try: self.callback()
+                except Exception as e: __main__.log.f(f"WatchHandler error:", str(e))
+            self.mtimes[event.src_path] = curr_mtime
+
+
+def run(cmd, get_output=False, fatal_errors=True):
+    """Run one or more shell commands."""
+    import subprocess
+    import shlex
+  
+    # Convert string cmd into list:
+    if not isinstance(cmd, (list, tuple)):
+        cmd = [cmd]
+      
+    # Run each command from cmd
+    for command in cmd:
+        # Break string command into list
+        if isinstance(command, str):
+            command = shlex.split(command)
+            
+        try:
+            result = subprocess.run(command, capture_output=True, text=True)
+            
+            if not get_output and result.stdout != "": print(result.stdout)
+            elif get_output: return result.stdout
+        except Exception as e:
+            __main__.log.e("Execution failed:", e)
+            if fatal_errors: exit(1)
+
+
+def pad(text, n=9, wraplines=True, end='\n'):
+    """Generates left-padded paragraphs of text in terminal"""
+    
+    import textwrap
+    import shutil
+
+    width = shutil.get_terminal_size().columns - (n + 1)
+
+    lines = []
+    #text = " -" * int(width /2) + "-" *width 
+    
+    if wraplines == False and '\n' in text.strip(): 
+      for part in text.split('\n'):
+          for line in textwrap.wrap(part, width=width): lines.append(line)
+    else: 
+          lines = textwrap.wrap(text, width=width)
+    
+    lines[-1] = lines[-1].strip()
+    line_end = '\n'
+    for line in lines:
+        if line == lines[-1]: line_end = end
+        print(" " * n, line.ljust(width), end=line_end)
+        

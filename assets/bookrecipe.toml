@@ -27,7 +27,7 @@ author = [ "Author" ]
 # chapter = "auto"
 # cfg = [ {name = "font-size", value = '22pt'} ]
 
-[pandoc.flags]
+[pandoc.args]
 split-level = 2
 epub-title-page = true
 pdf-engine = "typst"

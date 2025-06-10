@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # DESC: Build Pandoc books based on instructions in bookrecipe.toml files.
 # USAGE: bookmkr [OPTIONS] <FORMAT>
+# INFO: exit error numbers: 0 = OK, 1 = bookmkr, 2 = subprocess, 3 = file, 4 = unknown
 
 import yaml
 import glob
@@ -122,11 +123,11 @@ log.m("Book format:", cfg.general.format)
 
 
 # Collect CLI flags/arguments
-flags = ""
-if cfg.general.format == 'pdf': flags += "--pdf-engine='typst' "
-for key, value in cfg.pandoc.flags.items():
-    if value == 'true': flags += f'--{key} '
-    else: flags += f'--{key}="{value}" '
+pandoc_args = ""
+if cfg.general.format == 'pdf': pandoc_args += "--pdf-engine='typst' "
+for key, value in cfg.pandoc.args.items():
+    if value == 'true': pandoc_args += f'--{key} '
+    else: pandoc_args += f'--{key}="{value}" '
 
 
 # Get the relative output directory
@@ -148,7 +149,7 @@ command = 'a'
 command = 'pandoc '
 command += f'--output="{output}" '
 command +=  '--metadata-file="assets/.data.yaml" '
-command += f'{flags}'
+command += f'{pandoc_args}'
 #command += " ".join(sorted( glob.glob(cfg.general.sources) ))
 command += " ".join(cfg.general.sources)
 

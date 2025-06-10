@@ -17,5 +17,5 @@ Development TODO [codetags](https://peps.python.org/pep-0350/) in the code can b
 viewed from project root by using:
 
 ```
-todo -p todo
+todo --root
 ```

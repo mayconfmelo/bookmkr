@@ -1,7 +1,7 @@
 # Book Maker
 
 <center>
-  Build Pandoc books based on instructions in bookrecipe.toml files.
+  Build Pandoc books based on instructions in _bookrecipe.toml_ files.
 </center>
 
 
@@ -11,7 +11,8 @@
 bookmkr --init
 ```
 
-Given that the command above was executed in a `project/` directory, it creates:
+Given that the command above was executed inside a `project/` directory, it
+creates:
 
 ```
 project/
@@ -22,31 +23,31 @@ project/
 │    ├── styles.css
 │    └── templates/
 ├── book/
-│    └── Title.FORMAT
+│    └── Title.epub
 └── bookrecipe.toml
-
 ```
 
-When executed again, `bookmkr` search for `bookrecipe.toml` to colect data about
-the book and and where is the content (Markdown files, by default) to generate a book
-in _FORMAT_ inside `book/`
+When executed again, `bookmkr` will search for a _bookrecipe.toml_ to identify
+the book project root and colect data about the book and its content. By
+default, it will search for content (markdown files) in project root and
+generate a book called _Title_ in ePub format — all of this can be customized in
+_bookrecipe.toml_ file.
 
 
 ## Description
 
-Allows to generate books in various formats and to manage complex generation
-processes through a `bookrecipe.toml` file. This file identifies a book project,
+Can generate books in various formats and manage complex generation processes
+through a _bookrecipe.toml_ file. This file identifies a book project,
 and must lie in its root directory; it defines all book metadata such as title,
-subtitle, publisher, or date, and all Pandoc options used — as well as specific
-_bookmkr_ options.
+subtitle, publisher, date, all Pandoc options used, and the specific `bookmkr`
+options.
 
-Besides facilitate Pandoc management, _bookmkr_ also allows to
-automatically execute helper commands and scripts before and after the book
-generation itself — this is useful to prepare input files before generation or
-adjust the output files after the generation.
+It also allows to automatically execute helper commands and scripts before and
+after the book generation itself — this is useful to prepare input files before
+generation or adjust the output files after the generation.
 
 > [!NOTE]
-> _bookmkr_ uses Typst as PDF engine and its _[min-book](https://typst.app/universe/package/min-book)_
+> `bookmkr` uses Typst as PDF engine and its _[min-book](https://typst.app/universe/package/min-book)_
 > package as template to generate books.
 
 
@@ -56,26 +57,27 @@ adjust the output files after the generation.
   <dt><code><strong>-h, --help</strong></code></dt>
   <dd>Shows a help message.</dd>
 
+  <dt><code><strong>-i, --init</strong></code></dt>
+  <dd>Initialize a new book project.</dd>
+
+  <dt><code><strong>-w, --watch</strong></code></dt>
+  <dd>Enables continuous building mode.</dd>
+  
   <dt><code><strong>-v, --verbose</strong></code></dt>
   <dd>Enables verbose mode.</dd>
  
-  <dt><code><strong>-l, --loop</strong></code></dt>
-  <dd>Enables continuous building mode.</dd>
+  <dt><code><strong>-c, --color, --no-color</strong></code></dt>
+  <dd>Set color in texs.</dd>
   
-  <dt><code><strong>-s, --sleep-time</strong> <em>SLEEP_TIME</em></code></dt>
-  <dd>Set the <code><em>SLEEP_TIME</em></code> between each build in continuous building mode.</dd>
-  
-  <dt><code><strong>-i, --init</strong></code></dt>
-  <dd>Initialize a new book project.</dd>
 </dl>
 
-Optionally, a sole _**`format`**_ argument can be passed to set the book output file
+Optionally, a positional _**`format`**_ argument can be passed to set the book output file
 format — it overwrites the `bookrecipe.toml` option with the same name.
 
 
 ## Configuration File
 
-The `bookrecipe.toml` concentrates all options needed to manage the project.
+The _bookrecipe.toml_ concentrates all options needed to manage the project.
 By default, it assumes the following values:
 
 ```toml
@@ -88,25 +90,25 @@ cmd-after = false
 
 [book]
 title = "Title"
-subtitle = "Subtitle"
-lang = "en-US"
-date = 2024
-edition = 1
-volume = 1
-author = [ "Author" ]
-publisher = [ "Publisher" ]
-date = 2025
-cover-image = "assets/cover.png"
-titlepage = auto
-catalog = "none"
-errata = "none"
-dedication = "none"
-acknowledgements = "none"
-epigraph = "none"
-toc = true
-part = "auto"
-chapter = "auto"
-cfg = [ {name = "font-size", value = '22pt'} ]
+# subtitle = "Subtitle"
+# lang = "en-US"
+# date = 2024
+# edition = 1
+# volume = 1
+# author = [ "Author" ]
+# publisher = [ "Publisher" ]
+# date = 2025
+# cover-image = "assets/cover.png"
+# titlepage = auto
+# catalog = "none"
+# errata = "none"
+# dedication = "none"
+# acknowledgements = "none"
+# epigraph = "none"
+# toc = true
+# part = "auto"
+# chapter = "auto"
+# cfg = [ {name = "font-size", value = '22pt'} ]
 
 [pandoc.flags]
 split-level = 2
@@ -115,9 +117,16 @@ pdf-engine = "typst"
 template = "./assets/templates/template"
 lua-filter = "./assets/filters.lua"
 css = "assets/styles.css"
+
 ```
 
+The commented `#` values are suggestions to the user, while the others are default
+values. It's not necessary to set all these options; in fact, if you delete all
+of them and use a blank _bookrecipe.toml_ file, they will fallback to these
+defaults — after all, all options should be... optional.
+
 <dl>
+
   <dt><strong>format</strong></dt>
   <dd>The book output file format (CLI option overwrites it).</dd>
   
@@ -135,11 +144,12 @@ css = "assets/styles.css"
   <dd>A string or arrays with a single shell command to he executed after the
   main <code>pandoc</code> parsing.</dd>
   
-  <dt><strong>[pandoc.flags]</strong></dt>
-  <dd>Set Pandoc option flags and its values; each <code>pandoc --flag=value</code>
-  becomes a <code>flag = value</code> TOML pair. Brief <code>-f</code> flags are not supported.</dd>
-  
   <dt><strong>[book]</strong></dt>
-  <dd>Defines the book metadata such as title, author, dedication, etc.</dd>
+  <dd>Defines book metadata such as title, author, dedication, etc.</dd>
+
+  <dt><strong>[pandoc.flags]</strong></dt>
+  <dd>Set Pandoc option/argument flags and its values; the flags without value
+  are set with a <code>"true"</code> value. Brief one-letter flags are not
+  supported.
   
 </dl>

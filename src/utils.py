@@ -152,7 +152,8 @@ class WatchHandler(FileSystemEventHandler):
                 
                 now = datetime.fromtimestamp(curr_mtime).strftime("%H:%M:%S")
                 try: self.callback()
-                except Exception as e: __main__.log.f(f"WatchHandler error:", str(e))
+                except Exception as e:
+                    __main__.log.f(f"WatchHandler error:", e, code=5)
             self.mtimes[event.src_path] = curr_mtime
 
 
@@ -175,7 +176,8 @@ def run(cmd, get_output=False, fatal_errors=True):
         
         if result.stderr:
             print()
-            if fatal_errors: __main__.log.f("Execution failed:", result.stderr)
+            if fatal_errors:
+                __main__.log.f("Execution failed:", result.stderr, code=2)
             else: __main__.log.e("Execution failed:", result.stderr)
         else:
             if not get_output and result.stdout != "": print(result.stdout)

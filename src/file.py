@@ -63,9 +63,9 @@ def toml(default, local):
     except FileNotFoundError:
         __main__.log.e("File not found:", f"{file}")
     except tomli.TOMLDecodeError as e:
-        __main__.log.f("TOML decode error:", f"{e}")
+        __main__.log.f("TOML decode error:", f"{e}", code=4)
     except Exception as e:
-        __main__.log.f("TOML error:", f"{e}")
+        __main__.log.f("TOML error:", f"{e}", code=4)
 
 
 def write(content, path):
@@ -76,8 +76,10 @@ def write(content, path):
             file.write("---\n")
             file.write(content)
             file.write("...")
-    except FileNotFoundError as e: __main__.log.f("Temporary file not found:", path)
-    except Exception as e: __main__.log.f("Could not write metadata:", e)
+    except FileNotFoundError as e:
+        __main__.log.f("Temporary file not found:", path, code=3)
+    except Exception as e:
+        __main__.log.f("Could not write metadata:", e, code=3)
     
     __main__.log.m("Created file:", f"{path}")
 

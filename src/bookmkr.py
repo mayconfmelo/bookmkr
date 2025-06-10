@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # DESC: Build Pandoc books based on instructions in bookrecipe.toml files.
-# USAGE: bookmkr [OPTIONS] <FORMAT>
-# INFO: exit error numbers: 0 = OK, 1 = bookmkr, 2 = subprocess, 3 = file, 4 = unknown
+# USAGE: bookmkr [OPTIONS] [FORMAT]
 
 import yaml
 import glob
@@ -12,7 +11,14 @@ import file
 
 
 # CLI argument parsing
-parser = argparse.ArgumentParser(description="")
+parser = argparse.ArgumentParser(
+    description="Build Pandoc books based on instructions in bookrecipe.toml files.",
+    usage="%(prog)s [OPTIONS] [FORMAT]",
+    epilog="""
+        Exit codes used: 0 = OK, 1 = bookmkr error, 2 = subprocess error,
+        3 = path error, 4 = TOML, 5 = WatchHandler, 7+ = others.
+    """
+)
 parser.add_argument(
     "format",
     help="set the book format.", nargs="?",
@@ -99,7 +105,7 @@ if args.init:
 if cfg_local:
     cfg_local_dir = os.path.dirname(cfg_local)
     os.chdir(cfg_local_dir)
-else: log.f("Not a book project", code=2)
+else: log.f("Not a book project", code=1)
 
 
 
@@ -239,4 +245,4 @@ else:
   execute()
   
   if os.path.isfile(output): log.s("Book created:", os.path.relpath(output))
-  else: log.f("Error: No book file was generated.", code=2)
+  else: log.f("Error: No book file was generated.", code=3)

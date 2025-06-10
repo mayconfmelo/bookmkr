@@ -75,6 +75,17 @@ Optionally, a positional _**`format`**_ argument can be passed to set the book o
 format — it overwrites the `bookrecipe.toml` option with the same name.
 
 
+## Dependencies
+
+To work properly, `bookmkr` needs the folowing programs installed and working:
+
+- Pandoc 
+- Python
+  - tomli
+  - PyYAML
+  - watchdog
+
+
 ## Configuration File
 
 The _bookrecipe.toml_ concentrates all options needed to manage the project.
@@ -147,9 +158,9 @@ defaults — after all, all options should be... optional.
   <dt><strong>[book]</strong></dt>
   <dd>Defines book metadata such as title, author, dedication, etc.</dd>
 
-  <dt><strong>[pandoc.flags]</strong></dt>
-  <dd>Set Pandoc option/argument flags and its values; the flags without value
-  are set with a <code>"true"</code> value. Brief one-letter flags are not
-  supported.
+  <dt><strong>[pandoc.args]</strong></dt>
+  <dd>Set Pandoc argument/flag options and its values; flags without value are
+  set with a <code>"true"</code> value. Brief one-letter arguments are not
+  supported.</dd>
   
 </dl>

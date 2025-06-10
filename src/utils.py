@@ -130,8 +130,8 @@ class DictAttr(dict):
             raise AttributeError(f"No such attribute: {attr}")
 
 
-    """Handles modificafions made in one or more paths."""
 class WatchHandler(FileSystemEventHandler):
+    """Handles modificafions made in one or more paths."""
   
     def __init__(self, callback, files):
         self.callback = callback
@@ -170,15 +170,16 @@ def run(cmd, get_output=False, fatal_errors=True):
         # Break string command into list
         if isinstance(command, str):
             command = shlex.split(command)
-            
-        try:
-            result = subprocess.run(command, capture_output=True, text=True)
-            
+        
+        result = subprocess.run(command, capture_output=True, text=True)
+        
+        if result.stderr:
+            print()
+            if fatal_errors: __main__.log.f("Execution failed:", result.stderr)
+            else: __main__.log.e("Execution failed:", result.stderr)
+        else:
             if not get_output and result.stdout != "": print(result.stdout)
             elif get_output: return result.stdout
-        except Exception as e:
-            __main__.log.e("Execution failed:", e)
-            if fatal_errors: exit(1)
 
 
 def pad(text, n=9, wraplines=True, end='\n'):
@@ -192,11 +193,12 @@ def pad(text, n=9, wraplines=True, end='\n'):
     lines = []
     #text = " -" * int(width /2) + "-" *width 
     
+    # print(text)
     if wraplines == False and '\n' in text.strip(): 
-      for part in text.split('\n'):
-          for line in textwrap.wrap(part, width=width): lines.append(line)
+        for part in text.split('\n'):
+            for line in textwrap.wrap(part, width=width): lines.append(line)
     else: 
-          lines = textwrap.wrap(text, width=width)
+        lines = textwrap.wrap(text, width=width)
     
     lines[-1] = lines[-1].strip()
     line_end = '\n'

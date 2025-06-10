@@ -1,8 +1,8 @@
-import utils
 import __main__
 
-# Recursivelly search for file in parent folders.
 def find(file, current_dir=None):
+    """Recursivelly search for file in parent folders."""
+    
     import os
   
     # If no current_dir, set it to $PWD
@@ -13,20 +13,21 @@ def find(file, current_dir=None):
     file_path = os.path.join(current_dir, file)
 
     if os.path.isfile(file_path):
-        if __main__.args.verbose: utils.log("m", "Found file:", f"{file_path}")
+        __main__.log.m("Found file:", str(file_path))
         return file_path
         
     # Stop searching if current_dir is the root directory
     if current_dir == os.path.dirname(current_dir):
-        utils.log("e", "File not found:", f"{file}")
+        __main__.log.e("File not found:", str(file))
         return None
 
     # If not found, search again in parent directory
     return find(file, os.path.dirname(current_dir))
 
 
-# Read TOML file.
 def toml(default, local):
+    """Read TOML file and return its dictionary."""
+    
     import tomli
     
     try:
@@ -60,25 +61,30 @@ def toml(default, local):
             return data
         
     except FileNotFoundError:
-        utils.log("e", "File not found:", f"{file}")
+        __main__.log.e("File not found:", f"{file}")
     except tomli.TOMLDecodeError as e:
-        utils.log("e", "TOML decode error:", f"{e}")
+        __main__.log.f("TOML decode error:", f"{e}")
     except Exception as e:
-        utils.log("e", "TOML error:", f"{e}")
+        __main__.log.f("TOML error:", f"{e}")
 
 
-# Write book data.yaml file
 def write(content, path):
-    with open(path, "w") as file:
-        file.write("---\n")
-        file.write(content)
-        file.write("...")
+    """Write temporary assets/.data.yaml file."""
     
-    if __main__.args.verbose: utils.log("m", "Created file:", f"{path}")
+    try:
+        with open(path, "w") as file:
+            file.write("---\n")
+            file.write(content)
+            file.write("...")
+    except FileNotFoundError as e: __main__.log.f("Temporary file not found:", path)
+    except Exception as e: __main__.log.f("Could not write metadata:", e)
+    
+    __main__.log.m("Created file:", f"{path}")
 
 
-# Resolves one or more globs
 def globs(globs):
+    """Resolves one or more globs, in order."""
+    
     import glob
     
     if not isinstance(globs, list): globs = [globs]

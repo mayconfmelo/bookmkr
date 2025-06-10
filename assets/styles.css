@@ -34,7 +34,8 @@ p:first-child,
 :not(p) + p {
   text-indent: 0;
 }
-.capitular,
+.dropcap,
+.dropcap p,
 h1 + p::first-letter,
 h2 + p::first-letter {
   font-size: 4em;
@@ -43,7 +44,8 @@ h2 + p::first-letter {
   margin: 0;
   line-height: 1;
 }
-.no-capitular::first-letter {
+.no-dropcap::first-letter,
+.no-dropcap p::first-letter {
   font-size: inherit;
   float: none;
   display: inherit;

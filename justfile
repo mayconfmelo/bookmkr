@@ -14,7 +14,7 @@ remove:
   
 
 # test the program.
-test init="none":
+test init="none" format="epub":
   #!/usr/bin/env bash
   filepath="$(realpath src/bookmkr.py)"
   
@@ -27,7 +27,7 @@ test init="none":
     cd test/
   fi
   
-  python $filepath --verbose
+  python $filepath --verbose {{format}}
   
 # move changes in test/ to assets/
 [private]

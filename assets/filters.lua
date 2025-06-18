@@ -1,7 +1,7 @@
 -- TODO: implement min-book options in epub template
 
--- GitHub-like [!CALLOUT] in blockquotes
 function BlockQuote(el)
+  -- GitHub-like [!CALLOUT] in blockquotes
   local content = el.content
   for i, blk in ipairs(content) do
     if blk.t == "Para" and #blk.c > 0 then
@@ -74,4 +74,30 @@ function RawInline(el)
   if el.format == "tex" and FORMAT == "typst" then
     return pandoc.RawInline("typst", el.text)
   end
+end
+
+
+
+function Meta(meta)
+  -- Include CSS inside HTML files
+  local include_css = {
+    html = true,
+    html4 = true,
+    html5 = true
+  }
+  if include_css[FORMAT] and meta.css then
+    local path = pandoc.utils.stringify(meta.css)
+    local infile = io.open(path, "rb")
+    if not infile then
+      io.stderr:write("Error reading file: " .. source .. "\n")
+      return
+    end
+  
+    local content = infile:read("*all")
+    meta.css = pandoc.MetaString(content)
+    
+    infile:close()
+  end
+
+  return meta
 end

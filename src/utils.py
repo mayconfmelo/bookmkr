@@ -98,6 +98,19 @@ class Log:
             print(self.reset)
         exit(code)
 
+    def t(self, msg, data=None):
+        """Print a timed log message."""
+        from datetime import datetime
+        
+        if not self.verbose: return
+        time = datetime.now().strftime("%H:%M:%S")
+        print(f"{self.cyan} {time} {self.reset}{msg}", flush=self.flush)
+        if data:
+            print(self.magenta, end='')
+            pad(data, wraplines=False, end ='')
+            print(self.reset)
+        print()
+
 
 class DictAttr(dict):
     """Init a dictionary object that allows to access dict["foo"] as dict.foo"""
@@ -128,6 +141,9 @@ class DictAttr(dict):
             del self[attr]
         except KeyError:
             raise AttributeError(f"No such attribute: {attr}")
+
+    def dict(self):
+        return dict(self)
 
 
 class WatchHandler(FileSystemEventHandler):
@@ -162,8 +178,8 @@ def run(cmd, get_output=False, fatal_errors=True):
     import subprocess
     import shlex
   
-    # Convert string cmd into list:
-    if not isinstance(cmd, (list, tuple)):
+    # Convert string/array cmd into list, unless it's an array of arrays:
+    if not isinstance(cmd[0], (list, tuple)):
         cmd = [cmd]
       
     # Run each command from cmd
@@ -195,7 +211,7 @@ def pad(text, n=9, wraplines=True, end='\n'):
     lines = []
     #text = " -" * int(width /2) + "-" *width 
     
-    # print(text)
+    text = str(text)
     if wraplines == False and '\n' in text.strip(): 
         for part in text.split('\n'):
             for line in textwrap.wrap(part, width=width): lines.append(line)
@@ -204,6 +220,7 @@ def pad(text, n=9, wraplines=True, end='\n'):
     
     lines[-1] = lines[-1].strip()
     line_end = '\n'
+    
     for line in lines:
         if line == lines[-1]: line_end = end
         print(" " * n, line.ljust(width), end=line_end)

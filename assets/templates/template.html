@@ -18,36 +18,38 @@
   $endif$
   <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
   <style>
+    /* Pandoc default HTML styles */
     $styles.html()$
+    
+    $if(css)$/* Contents of custom CSS file */
+    $for(css)$$css$$endfor$
+    $endif$
+    
+    /* HTML-specific styles */
+    body {
+      margin: 10px;
+    }
+    pre.sourceCode, pre {
+      margin: 0;
+      color: white;
+      background: rgb(10,10,10);
+      padding: 0.5em;
+    }
+    header {
+      margin: 2em;
+      font-weight: bold;
+    }
+    header * {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    header .date {
+      margin-top: 1em;
+    }
+    header .title {
+      font-size: 2.3em;
+    }
   </style>
-  $for(css)$
-    <link rel="stylesheet" href="$css$" />
-  $endfor$
-    <style>
-      body {
-        margin: 10px;
-      }
-      pre.sourceCode, pre {
-        margin: 0;
-        color: white;
-        background: rgb(10,10,10);
-        padding: 0.5em;
-      }
-      header {
-        margin: 2em;
-        font-weight: bold;
-      }
-      header * {
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      header .date {
-        margin-top: 1em;
-      }
-      header .title {
-        font-size: 2.3em;
-      }
-    </style>
   $for(header-includes)$
     $header-includes$
   $endfor$

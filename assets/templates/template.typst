@@ -21,7 +21,7 @@ $definitions.typst()$
   $if(chapter)$ chapter: $chapter$, $endif$
   cfg: (
     $for(cfg)$$cfg.name$: $cfg.value$, $endfor$
-    $if(lang)$lang: "$lang$".replace(regex("-.*"), ""), $endif$
+    lang: $if(lang)$"$lang$".replace(regex("-.*"), "")$else$"en"$endif$,
   ),
 )
 

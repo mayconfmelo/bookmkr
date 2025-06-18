@@ -16,15 +16,15 @@ creates:
 
 ```
 project/
-├── 01.md
-├── assets/
-│    ├── cover.png
-│    ├── filters.lua
-│    ├── styles.css
-│    └── templates/
-├── book/
-│    └── Title.epub
-└── bookrecipe.toml
+ ├── 01.md
+ ├── assets/
+ │    ├── cover.png
+ │    ├── filters.lua
+ │    ├── styles.css
+ │    └── templates/
+ ├── book/
+ │    └── Title.epub
+ └── bookrecipe.toml
 ```
 
 When executed again, `bookmkr` will search for a _bookrecipe.toml_ to identify

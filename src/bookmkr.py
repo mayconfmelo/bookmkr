@@ -77,9 +77,12 @@ if args.init:
         # Move 01.md from $PWD/assets/ to $PWD
         shutil.move("./assets/01.md", "./")
         with open(f"{proj_dir}/README.md", 'r', encoding='UTF-8') as readme:
+            # Opens the bookmkr README.md file
             readme = readme.read()
-            readme = readme.replace("# ", "## ")
+            # Change the title to level 1 markdown
+            readme = readme.replace("# Book Maker", "## Book Maker")
         with open("01.md", 'a', encoding='UTF-8') as init:
+            # Insert the README.md content into the default 01.md as "Documentation"
             init.write("\n\n\n# Documentation\n\n\n")
             init.write(readme)
         log.m("Created file:", "01.md")
@@ -101,42 +104,83 @@ if args.init:
         log.w("There's a book project here already!")
         exit(1)
  
- 
+
+# Set project directory based on bookrecipe.toml location
 if cfg_local:
     cfg_local_dir = os.path.dirname(cfg_local)
     os.chdir(cfg_local_dir)
 else: log.f("Not a book project", code=1)
 
 
-
 # Book configurations
 cfg = utils.DictAttr(
     file.toml(cfg_default, cfg_local)
 )
-
-if args.format: cfg.general.format = args.format
-
-# Write .data.yaml file in assets/
-file.write(
-  yaml.dump(cfg["book"]),
-  cfg_local_dir + "/assets/.data.yaml"
-)
 cfg.book.title = cfg.book.title.replace("\\n", " ")
 cfg.general.sources = file.globs(cfg.general.sources)
+# Overwrite bookrecipe.toml format for the CLI bookmkr [FORMAT], if any:
+if args.format: cfg.general.format = args.format
 
-log.m("Book title:", cfg.book.title)
-log.m("Book format:", cfg.general.format)
+# Log book metadata
+data = ""
+if args.verbose:
+    import string
+    
+    for key,val in [*cfg.book.items(), *cfg.general.items()]:
+        if isinstance(val, list): val = "\n  " + "\n  ".join(val)
+        else: val = str(val)
+        
+        key = key.replace("-", " ")
+        data += f"{string.capwords(key)}: {val}\n"
+
+log.m("Book data retrieved:", data)
 
 
-# Collect CLI flags/arguments
+# Collect Pandoc flags/arguments
 pandoc_args = ""
 if cfg.general.format == 'pdf': pandoc_args += "--pdf-engine='typst' "
 for key, value in cfg.pandoc.args.items():
     if value == 'true': pandoc_args += f'--{key} '
+    elif key == 'css': cfg.book.css = value
     else: pandoc_args += f'--{key}="{value}" '
 
+# Handle missing templates
+if cfg.pandoc.args.template:
+    if cfg.general.format == 'pdf' and cfg.pandoc.args.get('pdf-engine'):
+        format = cfg.pandoc.args.get('pdf-engine')
+    else: format = cfg.general.format
+    
+    template_path = cfg.pandoc.args.template + "." + format
+    
+    if not os.path.isfile(template_path):
+        log.e("Template file not found")
+        
+        # Gather supported formats
+        formats = utils.run("pandoc --list-output", get_output=True)
+        formats = formats.strip().split("\n")
+        
+        if cfg.general.format in formats:
+            # Get default template for cfg.general.format
+            template = utils.run(f"pandoc -D {cfg.general.format}", get_output=True)
+            
+            with open(template_path, 'w') as template_file:
+                template_file.write(template)
+                
+            log.w("Fallback to default template:", template_path)
+        else:
+            log.f(f"Format not supported by Pandoc: {cfg.general.format}")
+    else:
+        log.m("Template file found:", template_path)
 
-# Get the relative output directory
+
+# Write .data.yaml file in assets/
+file.write(
+  content=yaml.dump(cfg.book.dict()),
+  path=f'{cfg_local_dir}/assets/.data.yaml'
+)
+
+
+# Get the output directory
 output_dir = os.path.join(
     os.path.relpath(cfg_local_dir),
     cfg.general.output
@@ -144,29 +188,25 @@ output_dir = os.path.join(
 if not os.path.isdir(output_dir): os.mkdir(output_dir)
 
 
-# Get the relative output path (directory and file name):
+# Get the output full path (directory and file name):
 output = os.path.join(
     output_dir,
     cfg.book.title + "." + cfg.general.format
 )
 
 # Generates the pandoc command:
-command = 'a'
 command = 'pandoc '
 command += f'--output="{output}" '
-command +=  '--metadata-file="assets/.data.yaml" '
+command += f'--write="{cfg.general.format}" '
+command += f'--metadata-file="{cfg_local_dir}/assets/.data.yaml" '
 command += f'{pandoc_args}'
 #command += " ".join(sorted( glob.glob(cfg.general.sources) ))
 command += " ".join(cfg.general.sources)
 
-# if args.watch:
-#     import time
-#     log.m(f"Continuous building mode ({args.sleep_time}s)")
-
 
 # Run cmd-before, command, and cmd-after
 def execute():
-    # End "Waiting for for changes" with DONE in loop
+    # End previous "Waiting for for changes" when in loop
     if args.watch: print("DONE")
   
     # Optional command executed before pandoc
@@ -181,6 +221,7 @@ def execute():
             utils.pad(out, wraplines=False)
             print()
     
+    
     # Verbose changes between bookmkr and bookmkr --watch
     if args.watch:
         from datetime import datetime
@@ -192,11 +233,13 @@ def execute():
         
     log.o(f"Building book" + points)
     
-    # Execute the pandoc command
+    # Execute the main pandoc command
     utils.run(command)
     
+    # Handles bookmkr and bookmkr --watch logs
     if args.verbose or args.watch: print(f"DONE{now}\n")
     if args.watch: log.o("Waiting for changes...")
+    
     
     # Optional command executed after pandoc
     if cfg.general.get('cmd-after'):
@@ -222,7 +265,7 @@ if args.watch:
         color=args.color
     )
     
-    log.m(f"Continuous building mode")
+    log.m(f"Continuous building mode", "Rebuild the book on every change in the sources")
 
     # Event handler runs execute() when a file in cfg.general.sources is modified
     event_handler = utils.WatchHandler(execute, cfg.general.sources)
@@ -238,7 +281,7 @@ if args.watch:
     except KeyboardInterrupt:
         observer.stop()
         print()
-        log.w("Stoping continuous mode.")
+        log.w("Continuous building mode stoped.")
         exit(0)
     observer.join()
 else:

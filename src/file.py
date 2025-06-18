@@ -71,6 +71,8 @@ def toml(default, local):
 def write(content, path):
     """Write temporary assets/.data.yaml file."""
     
+    import os
+    
     try:
         with open(path, "w") as file:
             file.write("---\n")
@@ -81,7 +83,7 @@ def write(content, path):
     except Exception as e:
         __main__.log.f("Could not write metadata:", e, code=3)
     
-    __main__.log.m("Created file:", f"{path}")
+    __main__.log.m("Created file:", f"{path.replace(os.getcwd() + "/", "")}")
 
 
 def globs(globs):

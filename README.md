@@ -30,7 +30,7 @@ project/
 When executed again, `bookmkr` will search for a _bookrecipe.toml_ to identify
 the book project root and colect data about the book and its content. By
 default, it will search for content (markdown files) in project root and
-generate a book called _Title_ in ePub format — all of this can be customized in
+generate a book called _Book Title_ in ePub format — all of this can be customized in
 _bookrecipe.toml_ file.
 
 
@@ -68,7 +68,10 @@ generation or adjust the output files after the generation.
  
   <dt><code><strong>-c, --color, --no-color</strong></code></dt>
   <dd>Set color in texs.</dd>
-  
+
+  <dt><code><strong>--auto-cover, --no-auto-cover</strong></code></dt>
+  <dd>Set automatic default cover generation when no cover is set.</dd>
+
 </dl>
 
 Optionally, a positional _**`format`**_ argument can be passed to set the book output file
@@ -100,14 +103,14 @@ cmd-before = false
 cmd-after = false
 
 [book]
-title = "Title"
-# subtitle = "Subtitle"
+title = "Book Title"
+# subtitle = "Book subtitle, not more than two lines long"
 # lang = "en-US"
 # date = 2024
 # edition = 1
 # volume = 1
-# author = [ "Author" ]
-# publisher = [ "Publisher" ]
+# author = [ "Book Author" ]
+# publisher = [ "Book Publisher" ]
 # date = 2025
 # cover-image = "assets/cover.png"
 # titlepage = auto

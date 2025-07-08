@@ -6,14 +6,14 @@ cmd-before = false
 cmd-after = false
 
 [book]
-title = "Title"
-# subtitle = "Subtitle"
+title = "Book Title"
+# subtitle = "Book subtitle, not more than two lines long
 # lang = "en-US"
 # date = 2024
 # edition = 1
 # volume = 1
-author = [ "Author" ]
-# publisher = [ "Publisher" ]
+author = [ "Book Author" ]
+# publisher = [ "Book Publisher" ]
 # date = 2025
 # cover-image = "assets/cover.png"
 # titlepage = auto

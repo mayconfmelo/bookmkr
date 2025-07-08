@@ -194,6 +194,7 @@ Transforms tye first letter of the text into a dropcap:
 ```markdown
 ::: {.dropcap}
 The initial "T" letter will be a dropcap.
+:::
 ```
 
 The dropcap can be removed with:

@@ -39,6 +39,10 @@ parser.add_argument(
     "-c", "--color", default=True,
     help="set colored text status.", action=argparse.BooleanOptionalAction
 )
+parser.add_argument(
+    "--auto-cover", default=True,
+    help="set colored text status.", action=argparse.BooleanOptionalAction
+)
 # CLI arguments
 args = parser.parse_args()
 
@@ -127,7 +131,7 @@ if args.verbose:
     import string
     
     for key,val in [*cfg.book.items(), *cfg.general.items()]:
-        if isinstance(val, list): val = "\n  " + "\n  ".join(val)
+        if isinstance(val, list): val = "\n  " + "\n  ".join(str(i) for i in val)
         else: val = str(val)
         
         key = key.replace("-", " ")
@@ -135,6 +139,69 @@ if args.verbose:
 
 log.m("Book data retrieved:", data)
 
+
+# Generate automatic cover using min-book (Typst)
+if cfg.book.get('cover', 'auto') != 'none' and args.auto_cover and cfg.general.format != 'pdf':
+    import tempfile
+    import shutil
+    import glob
+    import os
+    
+    log.o("Generating automatic cover...")
+    
+    # Set subtitle, if any
+    subtitle = ""
+    if cfg.book.get('subtitle', None): subtitle = f'"{cfg.book.subtitle}"'
+    else: subtitle = "none"
+    
+    # Set authors
+    authors = ""
+    if not isinstance(cfg.book.author, list): cfg.book.author = [ cfg.book.author ]
+    for aut in cfg.book.author:
+        authors = authors + f'"{aut}",'
+    
+    # Set configurations
+    configs = ""
+    config = cfg.book.cfg
+    if config == None: config = []
+    elif not isinstance(config, list): config = [ config ]
+    config.append({'name': 'cover-back', 'value': 'false'})
+    for conf in config:
+        if conf == None: continue
+        configs = configs + f"{conf['name']}: {conf['value']},"
+    if not configs == '': configs = f"({configs})"
+    else: configs = f"(:)"
+    
+    # Write Typst temp file
+    with tempfile.NamedTemporaryFile(delete=False, mode='w+', suffix='.txt') as tmp:
+        tmp.write(f"""
+          #import "@preview/min-book:1.1.0": book
+
+          #show: book.with(
+            title: "{cfg.book.title}",
+            subtitle: {subtitle},
+            edition:  {cfg.book.get('edition', '0')},
+            volume:  {cfg.book.get('volume', '0')},
+            authors:  ({authors}),
+            date:  {cfg.book.get('date', 'datetime.today()')},
+            cfg: {configs},
+            titlepage: none,
+            toc: false,
+          )
+        """)
+        tmp_file = tmp.name
+    
+    utils.run("typst compile " + tmp_file + " cover{p}.png")
+    
+    cfg.book['cover-image'] = 'assets/cover.png'
+    
+    shutil.move('cover1.png', cfg.book['cover-image'])
+    for png in glob.glob('cover*.png'): os.remove(png)
+    if args.verbose: print("DONE\n")
+    # with open(tmp_file, 'r') as f: print(f.read())
+    
+    os.unlink(tmp_file)
+    
 
 # Collect Pandoc flags/arguments
 pandoc_args = ""

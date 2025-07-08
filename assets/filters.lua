@@ -3,18 +3,28 @@
 function BlockQuote(el)
   -- GitHub-like [!CALLOUT] in blockquotes
   local content = el.content
-  for i, blk in ipairs(content) do
-    if blk.t == "Para" and #blk.c > 0 then
-      local first = blk.c[1]
-      if first.t == "Str" and first.text:match("^%[%!.*%]") then
-        local label = first.text:match("^%[%!(.-)%]")
-        blk.c[1] = pandoc.Strong{pandoc.Str(label .. ":")}
-        table.insert(blk.c, 2, pandoc.LineBreak())
-      
-        el = pandoc.Div(el, {class = 'box'})
-      end
-    end
+  if el.content[1].content[1].text then
+    label = el.content[1].content[1].text:match("^%[%!(.-)%]")
+  else 
+    label = nil
   end
+  if label then
+    el.content[1].content[1] = pandoc.Strong{pandoc.Str(label..":")}
+    table.insert(el.content[1].content, 2, pandoc.LineBreak())
+    
+    if FORMAT == 'typst' then
+      content = pandoc.write(pandoc.Pandoc(el.content), "typst")
+      el = pandoc.RawBlock('typst', "#rect(width: 100%)["..content.."]")
+    else
+      el = pandoc.Div(el.content, {class = 'box'})
+    end
+
+   -- use #blockquote[] by min-book (Typst)
+  elseif FORMAT == 'typst' then
+    content = pandoc.utils.stringify(el.content)
+    el = pandoc.RawInline('typst', "#blockquote["..content.."]")
+  end
+  
   return el
 end
 
@@ -69,11 +79,48 @@ function Div(el)
 end
 
 
+function HorizontalRule(el)
+  if FORMAT == "typst" then
+    return pandoc.RawInline('typst', "#horizontalrule()")
+  else
+    return el
+  end
+end
+
+
 function RawInline(el)
   -- Get \n in Typst
   if el.format == "tex" and FORMAT == "typst" then
     return pandoc.RawInline("typst", el.text)
   end
+end
+
+
+function Span(el)
+  -- End notes
+  if el.classes:includes('note') then
+    if FORMAT == 'typst' then
+      content = pandoc.write(pandoc.Pandoc(el.content), "typst")
+      el = pandoc.RawInline('typst', "#note["..content.."]")
+    else 
+      el = pandoc.Note(el.content)
+    end
+  end
+  return el
+end
+
+
+function LineBlock(el)
+  -- Fix line block in typst PDF
+  if FORMAT == 'typst' then
+    typ = {}
+    for _,blk in ipairs(el.content) do
+      table.insert(typ, blk)
+      table.insert(typ, "#linebreak()")
+    end
+    el = pandoc.Div(typ)
+  end
+  return el
 end
 
 

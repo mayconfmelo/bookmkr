@@ -1,6 +1,6 @@
 $definitions.typst()$
 
-#import "@preview/min-book:1.0.0": book
+#import "@preview/min-book:1.1.0": *
 
 #show: book.with(
   title: "$title$",

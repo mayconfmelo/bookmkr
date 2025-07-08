@@ -167,3 +167,98 @@ defaults — after all, all options should be... optional.
   supported.</dd>
   
 </dl>
+
+
+## Syntax
+
+All input syntaxes compatible with Pandoc are also supported by _bookmkr_, but
+[Pandoc markdown](https://pandoc.org/MANUAL.html#pandocs-markdown) is recomended
+to get a better customization. There is also some _bookmkr_-specific features
+used with the following syntaxes:
+
+
+### Callout
+
+Creates a simple callout box:
+
+```markdown
+> [!TITLE]
+> Callout content.
+```
+
+
+### Dropcap
+
+Transforms tye first letter of the text into a dropcap:
+
+```markdown
+::: {.dropcap}
+The initial "T" letter will be a dropcap.
+```
+
+The dropcap can be removed with:
+
+```markdown
+::: {.no-dropcap}
+The initial T letter will be a normal letter.
+:::
+```
+
+
+### Text Indent
+
+Inserts first line indentation in all paragraphs but the first one:
+
+```markdown
+::: {.indent}
+This paragraph will not have indentation.
+
+This paragraph will have its first line indented.
+:::
+```
+
+The indentation can be removed with:
+
+```markdown
+::: {.no-indent}
+This paragraph will not have indentation.
+
+This paragraph will not have indentation either.
+:::
+```
+
+
+### Text Alignment
+
+Define the text alignment, like centered:
+
+```markdown
+::: {.center}
+Centered text.
+:::
+```
+
+Or left-aligned:
+
+```markdown
+::: {.left}
+Left-aligned text.
+:::
+```
+Or right-aligned:
+
+```markdown
+::: {.right}
+Right-aligned text.
+:::
+```
+
+
+### End Notes
+
+Inserts end notes, like footnotes but placed at the end of the current
+chapter/section:
+
+```markdown
+Normal text.[End note text]{.note}
+```

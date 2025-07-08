@@ -77,7 +77,6 @@ function RawInline(el)
 end
 
 
-
 function Meta(meta)
   -- Include CSS inside HTML files
   local include_css = {
@@ -92,7 +91,7 @@ function Meta(meta)
       io.stderr:write("Error reading file: " .. source .. "\n")
       return
     end
-  
+    
     local content = infile:read("*all")
     meta.css = pandoc.MetaString(content)
     

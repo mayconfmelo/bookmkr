@@ -1,7 +1,7 @@
 # Book Maker
 
 <center>
-  Build Pandoc books based on instructions in _bookrecipe.toml_ files.
+  Build Pandoc books based on instructions in <em>bookrecipe.toml</em> files.
 </center>
 
 
@@ -87,6 +87,8 @@ To work properly, `bookmkr` needs the folowing programs installed and working:
   - tomli
   - PyYAML
   - watchdog
+- Typst
+  - min-book (1.1.0)
 
 
 ## Configuration File
@@ -124,7 +126,7 @@ title = "Book Title"
 # chapter = "auto"
 # cfg = [ {name = "font-size", value = '22pt'} ]
 
-[pandoc.flags]
+[pandoc.args]
 split-level = 2
 epub-title-page = true
 pdf-engine = "typst"
